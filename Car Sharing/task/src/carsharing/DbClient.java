@@ -1,22 +1,25 @@
 package carsharing;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class DbClient {
-    private final DataSource dataSource;
+    static final String JDBC_DRIVER = "org.h2.Driver";
+    private static final String CONNECTION_URL = "jdbc:h2:./src/carsharing/db/carsharing";
 
-    DbClient(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    DbClient() {
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    };
 
     public void run(String query) {
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
+            connection.setAutoCommit(true);
             Statement statement = connection.createStatement();
             statement.executeUpdate(query);
         } catch (SQLException e) {
@@ -33,7 +36,7 @@ public class DbClient {
 
     public List<Company> selectForList(String query) {
         List<Company> companies = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
             Statement statement = connection.createStatement();
 
             ResultSet resultSet = statement.executeQuery(query);
@@ -48,6 +51,10 @@ public class DbClient {
             e.printStackTrace();
         }
         return companies;
+    }
+
+    public int insert(String query, String name) {
+
     }
 
 
