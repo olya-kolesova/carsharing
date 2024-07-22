@@ -53,8 +53,15 @@ public class DbClient {
         return companies;
     }
 
-    public int insert(String query, String name) {
-
+    public int insertValue(String query, String name) {
+        try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, name);
+            return preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 

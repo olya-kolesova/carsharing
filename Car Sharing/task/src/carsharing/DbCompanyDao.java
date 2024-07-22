@@ -1,7 +1,5 @@
 package carsharing;
 
-import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DbCompanyDao implements CompanyDao {
@@ -11,19 +9,26 @@ public class DbCompanyDao implements CompanyDao {
 
     private static final String CREATE_DB = """
             CREATE TABLE IF NOT EXISTS COMPANY(
-                ID INT PRIMARY KEY,
-                NAME VARCHAR
+                ID INT IDENTITY PRIMARY KEY,
+                NAME VARCHAR UNIQUE NOT NULL
             );
             """;
 
+    private static final String SET_ID_NOT_NULL = """
+            ALTER TABLE COMPANY
+            ALTER COLUMN ID
+            SET NOT NULL;
+            """;
+
+
     private static final String UPDATE_ID_COLUMN = """
             ALTER TABLE COMPANY
-            MODIFY COLUMN ID INT AUTO_INCREMENT PRIMARY_KEY;
+            ALTER COLUMN ID INT GENERATED ALWAYS AS IDENTITY;
             """;
 
     private static final String ADD_NOT_NULL_NAME = """
             ALTER TABLE COMPANY
-            MODIFY COLUMN NAME VARCHAR NOT NULL;
+            ALTER COLUMN NAME SET NOT NULL;
             """;
 
     private static final String ADD_UNIQUE_NAME = """
@@ -58,6 +63,21 @@ public class DbCompanyDao implements CompanyDao {
 
         return companies;
     }
+
+    public void save(Company company) {
+        System.out.println(dbClient.insertValue(INSERT, company.getName()));
+    }
+
+    public void updateColumnId() {
+        dbClient.run(SET_ID_NOT_NULL);
+        dbClient.run(UPDATE_ID_COLUMN);
+    }
+
+    public void updateColumnName() {
+        dbClient.run(ADD_NOT_NULL_NAME);
+        dbClient.run(ADD_UNIQUE_NAME);
+    }
+
 
 
 }
