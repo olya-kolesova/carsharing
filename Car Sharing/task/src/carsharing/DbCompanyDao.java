@@ -55,17 +55,11 @@ public class DbCompanyDao implements CompanyDao {
     @Override
     public List<Company> findAll() {
         List<Company> companies = dbClient.selectForList(SELECT_ALL);
-        System.out.println(companies.size());
-        for (Company company : companies) {
-            System.out.println(company.getId());
-            System.out.println(company.getName());
-        }
-
         return companies;
     }
 
     public void save(Company company) {
-        System.out.println(dbClient.insertValue(INSERT, company.getName()));
+        dbClient.insertValue(INSERT, company.getName());
     }
 
     public void updateColumnId() {
