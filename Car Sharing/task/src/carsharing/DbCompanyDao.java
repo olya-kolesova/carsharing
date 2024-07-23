@@ -14,6 +14,9 @@ public class DbCompanyDao implements CompanyDao {
             );
             """;
 
+    private static final String DROP_TABLE = """
+            DROP TABLE COMPANY;""";
+
     private static final String SET_ID_NOT_NULL = """
             ALTER TABLE COMPANY
             ALTER COLUMN ID
@@ -23,7 +26,8 @@ public class DbCompanyDao implements CompanyDao {
 
     private static final String UPDATE_ID_COLUMN = """
             ALTER TABLE COMPANY
-            ALTER COLUMN ID INT GENERATED ALWAYS AS IDENTITY;
+            ALTER COLUMN ID INT GENERATED ALWAYS AS IDENTITY
+            START WITH 1;
             """;
 
     private static final String ADD_NOT_NULL_NAME = """
@@ -47,9 +51,17 @@ public class DbCompanyDao implements CompanyDao {
             VALUES (?)
             """;
 
+    private static final String DELETE_ALL = """
+            DELETE FROM COMPANY;
+            """;
+
+    private static final String RESTART_ID = """
+            ALTER TABLE COMPANY ALTER COLUMN ID RESTART WITH 1;
+            """;
 
     DbCompanyDao(DbClient dbClient) {
         this.dbClient = dbClient;
+//        dbClient.run(CREATE_DB);
     }
 
     @Override
@@ -72,6 +84,20 @@ public class DbCompanyDao implements CompanyDao {
         dbClient.run(ADD_UNIQUE_NAME);
     }
 
+    public void deleteAll() {
+        dbClient.run(DELETE_ALL);
+    }
 
+    public void restartId() {
+        dbClient.run(RESTART_ID);
+    }
+
+    public void dropTable() {
+        dbClient.run(DROP_TABLE);
+    }
+
+    public void createDb() {
+        dbClient.run(CREATE_DB);
+    }
 
 }

@@ -6,8 +6,14 @@ public class Main {
 
 
     public static void main(String[] args) {
+        DbClient dbClient = new DbClient();
+        DbCompanyDao dbCompanyDao = new DbCompanyDao(dbClient);
+//        dbCompanyDao.dropTable();
+        dbCompanyDao.createDb();
         Scanner scanner = new Scanner(System.in);
         int commandStart = 100;
+
+
 
         while (commandStart != 0) {
             System.out.println("""
@@ -18,13 +24,12 @@ public class Main {
                 commandStart = scanner.nextInt();
                 switch(commandStart) {
                     case 1:
-                        DbClient dbClient = new DbClient();
-                        DbCompanyDao dbCompanyDao = new DbCompanyDao(dbClient);
                         int commandList = 100;
                         while (commandList != 0) {
                             System.out.println("""
                                     1. Company list
                                     2. Create a company
+                                    3. Delete all
                                     0. Back""");
                             try {
                                 commandList = scanner.nextInt();
@@ -39,11 +44,15 @@ public class Main {
                                         }
                                         break;
                                     case 2:
+//                                        dbCompanyDao.restartId();
                                         Scanner scannerSecond = new Scanner(System.in);
                                         System.out.println("Enter the company name:");
                                         String nameCompany = scannerSecond.nextLine();
                                         dbCompanyDao.save(new Company(nameCompany));
                                         break;
+                                    case 3:
+                                        dbCompanyDao.deleteAll();
+                                        dbCompanyDao.restartId();
                                     case 0:
                                         break;
                                     default:
