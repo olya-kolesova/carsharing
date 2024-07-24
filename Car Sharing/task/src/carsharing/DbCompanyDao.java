@@ -1,11 +1,10 @@
 package carsharing;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DbCompanyDao implements CompanyDao {
-    private static final String CONNECTION_URL = "jdbc:h2:./src/carsharing/db/carsharing";
     private final DbClient dbClient;
-
 
     private static final String CREATE_DB = """
             CREATE TABLE IF NOT EXISTS COMPANY(
@@ -59,9 +58,14 @@ public class DbCompanyDao implements CompanyDao {
             ALTER TABLE COMPANY ALTER COLUMN ID RESTART WITH 1;
             """;
 
+    private static final String SELECT_BY_ID = """
+            SELECT *
+            FROM COMPANY
+            WHERE ID = ?
+            """;
+
     DbCompanyDao(DbClient dbClient) {
         this.dbClient = dbClient;
-//        dbClient.run(CREATE_DB);
     }
 
     @Override
@@ -70,6 +74,12 @@ public class DbCompanyDao implements CompanyDao {
         return companies;
     }
 
+    @Override
+    public Optional<Company> findById(int id) {
+        return dbClient.select(SELECT_BY_ID, id);
+    }
+
+    @Override
     public void save(Company company) {
         dbClient.insertValue(INSERT, company.getName());
     }

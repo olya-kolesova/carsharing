@@ -3,6 +3,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 public class DbClient {
@@ -29,9 +30,18 @@ public class DbClient {
 
 
 
-//    public Company select(String query, ) {
-//
-//    }
+    public Optional<Company> select(String query, int id) {
+        try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            String name = resultSet.getString("NAME");
+            return Optional.of(new Company(id, name));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     public List<Company> selectForList(String query) {
@@ -52,6 +62,9 @@ public class DbClient {
         }
         return companies;
     }
+
+
+
 
     public int insertValue(String query, String name) {
         try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {

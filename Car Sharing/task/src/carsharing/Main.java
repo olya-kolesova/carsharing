@@ -41,10 +41,15 @@ public class Main {
                                             for (Company company : dbCompanyDao.findAll()) {
                                                 System.out.printf("%d. %s%n", company.getId(), company.getName());
                                             }
+                                            Scanner scannerChoose = new Scanner(System.in);
+                                            System.out.println("Choose the company:");
+                                            int index = scanner.nextInt();
+                                            dbCompanyDao.findById(index).ifPresentOrElse(
+                                                x -> System.out.printf("%s company", x.getName()),
+                                                System.out.println("The company not found!"));
                                         }
                                         break;
                                     case 2:
-//                                        dbCompanyDao.restartId();
                                         Scanner scannerSecond = new Scanner(System.in);
                                         System.out.println("Enter the company name:");
                                         String nameCompany = scannerSecond.nextLine();

@@ -1,11 +1,12 @@
 package carsharing;
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanyDao {
-//    Company findById();
+    Optional<Company> findById(int id);
     List<Company> findAll();
     void save(Company company);
 //    void update(Company company);
-//    void deleteById(int id);
+    void deleteAll();
 
 }

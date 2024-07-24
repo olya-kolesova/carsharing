@@ -1,20 +1,19 @@
 package carsharing;
 
-import java.util.List;
-
-public class Company {
+public class Car {
     private int id;
     private String name;
+    private Company company;
 
-    private List<Car> cars;
-
-    Company(String name) {
+    public Car(String name, Company company) {
         this.name = name;
+        this.company = company;
     }
 
-    Company(int id, String name) {
+    public Car(int id, String name, Company company) {
         this.id = id;
         this.name = name;
+        this.company = company;
     }
 
     public int getId() {
@@ -32,6 +31,15 @@ public class Company {
     public void setName(String nameNew) {
         this.name = nameNew;
     }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompanyId(Company companyNew) {
+        this.company = companyNew;
+    }
+
 
 
 }
