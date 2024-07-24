@@ -43,10 +43,26 @@ public class Main {
                                             }
                                             Scanner scannerChoose = new Scanner(System.in);
                                             System.out.println("Choose the company:");
-                                            int index = scanner.nextInt();
+                                            int index = scannerChoose.nextInt();
                                             dbCompanyDao.findById(index).ifPresentOrElse(
                                                 x -> System.out.printf("%s company", x.getName()),
-                                                System.out.println("The company not found!"));
+                                                () -> System.out.println("The company not found!")
+                                            );
+
+                                            int commandCars = 100;
+                                            while (commandCars != 0) {
+                                            System.out.println("""
+                                                    1. Car list
+                                                    2. Create a car
+                                                    0. Back
+                                                    """);
+                                            switch(commandCars) {
+                                                case 1:
+                                                    DbCarDao dbCarDao = new DbCarDao(DbClient dbClient, dbCompanyDao);
+                                            }
+
+                                            }
+
                                         }
                                         break;
                                     case 2:
