@@ -35,8 +35,15 @@ public class DbClient {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            String name = resultSet.getString("NAME");
-            return Optional.of(new Company(id, name));
+            Company company = null;
+            while (resultSet.next()) {
+                int index = resultSet.getInt("ID");
+                String name = resultSet.getString("NAME");
+                company = new Company(index, name);
+            }
+            if (company == null) throw new AssertionError();
+            return Optional.of(company);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
