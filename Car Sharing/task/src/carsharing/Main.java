@@ -10,6 +10,9 @@ public class Main {
         DbCompanyDao dbCompanyDao = new DbCompanyDao(dbClient);
 //        dbCompanyDao.dropTable();
         dbCompanyDao.createDb();
+        DbCarDao dbCarDao = new DbCarDao(dbClient);
+        dbCarDao.createTable();
+
         Scanner scanner = new Scanner(System.in);
         int commandStart = 100;
 
@@ -38,12 +41,17 @@ public class Main {
                                         if (dbCompanyDao.findAll().isEmpty()) {
                                             System.out.println("The company list is empty!");
                                         } else {
+
                                             for (Company company : dbCompanyDao.findAll()) {
                                                 System.out.printf("%d. %s%n", company.getId(), company.getName());
                                             }
+                                            System.out.println("0. Back");
                                             Scanner scannerChoose = new Scanner(System.in);
                                             System.out.println("Choose the company:");
                                             int index = scannerChoose.nextInt();
+                                            if (index == 0) {
+                                                break;
+                                            }
                                             dbCompanyDao.findById(index).ifPresentOrElse(
                                                 x -> System.out.printf("'%s' company%n", x.getName()),
                                                 () -> System.out.println("The company not found!")
@@ -60,22 +68,44 @@ public class Main {
                                                 System.out.println("""
                                                         1. Car list
                                                         2. Create a car
+                                                        3. Delete cars
                                                         0. Back
                                                         """);
-                                                DbCarDao dbCarDao = new DbCarDao(dbClient);
+//
                                                 commandCars = scanner.nextInt();
-                                                switch(commandCars) {
+                                                switch (commandCars) {
                                                     case 1:
+                                                        if (dbCarDao.findByCompany(company).isEmpty()) {
+                                                            System.out.println("The car list is empty!");
+                                                        } else {
+                                                            int count = 1;
+                                                            for (Car car : dbCarDao.findByCompany(company)) {
+                                                                System.out.printf("%d. %s%n", count, car.getName());
+                                                                count += 1;
+                                                            }
 
-//                                                        dbCarDao.createTable();
-                                                        for (Car car : dbCarDao.findByCompany(company)) {
                                                             System.out.println();
                                                         }
+                                                        break;
+                                                    case 2:
+                                                        Scanner scannerCar = new Scanner(System.in);
+                                                        System.out.println("Enter the car name:");
+                                                        String carName = scannerCar.nextLine();
+                                                        Car car = new Car(carName, company);
+                                                        dbCarDao.save(car);
+                                                        System.out.println("The car was added!");
+                                                        break;
+                                                    case 3:
+                                                        dbCarDao.deleteCars();
+                                                    case 0:
+                                                        break;
 
 
                                                 }
 
                                             }
+
+
 
                                         }
                                         break;

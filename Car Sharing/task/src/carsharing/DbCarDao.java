@@ -1,6 +1,8 @@
 package carsharing;
 
-public class DbCarDao {
+import java.util.List;
+
+public class DbCarDao implements CarDao {
     DbClient dbClient;
 
     private static final String CREATE_TABLE = """
@@ -13,10 +15,21 @@ public class DbCarDao {
             );
             """;
 
-            private static final String INSERT_CAR = """
-                    INSERT INTO CAR (NAME, COMPANY_ID)
-                    VALUES (?, ?);
-                    """;
+    private static final String INSERT_CAR = """
+            INSERT INTO CAR (NAME, COMPANY_ID)
+            VALUES (?, ?);
+            """;
+
+
+    private static final String SELECT_WITH_COMPANY = """
+            SELECT *
+            FROM CAR
+            WHERE COMPANY_ID = ?
+            """;
+
+    private static final String DELETE_CARS = """
+            DELETE FROM CAR;
+            """;
 
 
 
@@ -28,7 +41,19 @@ public class DbCarDao {
         dbClient.run(CREATE_TABLE);
         System.out.println("Table car created!");
     }
+    @Override
+    public List<Car> findByCompany(Company company) {
+        return dbClient.selectCarsByCompany(SELECT_WITH_COMPANY, company);
+    }
 
+    @Override
+    public void save(Car car) {
+        dbClient.insertCar(INSERT_CAR, car);
+    }
+
+    public void deleteCars() {
+        dbClient.run(DELETE_CARS);
+    }
 
 
 }
