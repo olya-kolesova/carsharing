@@ -1,9 +1,12 @@
-package carsharing;
+package carsharing.car;
+import carsharing.company.Company;
+import carsharing.customer.Customer;
 
 public class Car {
     private int id;
     private String name;
     private Company company;
+    private Customer customer;
 
     public Car(String name, Company company) {
         this.name = name;

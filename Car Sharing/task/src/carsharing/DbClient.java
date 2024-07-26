@@ -1,5 +1,7 @@
 package carsharing;
-import javax.sql.DataSource;
+import carsharing.car.Car;
+import carsharing.company.Company;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

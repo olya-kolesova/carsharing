@@ -1,4 +1,6 @@
-package carsharing;
+package carsharing.car;
+
+import carsharing.company.Company;
 
 import java.util.List;
 

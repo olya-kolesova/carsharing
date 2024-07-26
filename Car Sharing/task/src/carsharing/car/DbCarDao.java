@@ -1,4 +1,7 @@
-package carsharing;
+package carsharing.car;
+
+import carsharing.company.Company;
+import carsharing.DbClient;
 
 import java.util.List;
 
@@ -14,6 +17,7 @@ public class DbCarDao implements CarDao {
                 REFERENCES COMPANY(ID)
             );
             """;
+
 
     private static final String INSERT_CAR = """
             INSERT INTO CAR (NAME, COMPANY_ID)
@@ -33,7 +37,7 @@ public class DbCarDao implements CarDao {
 
 
 
-    DbCarDao(DbClient dbClient) {
+    public DbCarDao(DbClient dbClient) {
         this.dbClient = dbClient;
     }
 

@@ -1,4 +1,6 @@
-package carsharing;
+package carsharing.company;
+
+import carsharing.car.Car;
 
 import java.util.List;
 
@@ -8,11 +10,11 @@ public class Company {
 
     private List<Car> cars;
 
-    Company(String name) {
+    public Company(String name) {
         this.name = name;
     }
 
-    Company(int id, String name) {
+    public Company(int id, String name) {
         this.id = id;
         this.name = name;
     }

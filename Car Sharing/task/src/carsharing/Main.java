@@ -1,5 +1,11 @@
 package carsharing;
 
+import carsharing.car.Car;
+import carsharing.car.DbCarDao;
+import carsharing.company.Company;
+import carsharing.company.DbCompanyDao;
+import carsharing.customer.DbCustomerDao;
+
 import java.util.Scanner;
 
 public class Main {
@@ -8,15 +14,14 @@ public class Main {
     public static void main(String[] args) {
         DbClient dbClient = new DbClient();
         DbCompanyDao dbCompanyDao = new DbCompanyDao(dbClient);
-//        dbCompanyDao.dropTable();
         dbCompanyDao.createDb();
         DbCarDao dbCarDao = new DbCarDao(dbClient);
         dbCarDao.createTable();
+        DbCustomerDao dbCustomerDao = new DbCustomerDao(dbClient);
+        dbCustomerDao.createTable();
 
         Scanner scanner = new Scanner(System.in);
         int commandStart = 100;
-
-
 
         while (commandStart != 0) {
             System.out.println("""

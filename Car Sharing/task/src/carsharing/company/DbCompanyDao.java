@@ -1,4 +1,6 @@
-package carsharing;
+package carsharing.company;
+
+import carsharing.DbClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +66,7 @@ public class DbCompanyDao implements CompanyDao {
             WHERE ID = ?
             """;
 
-    DbCompanyDao(DbClient dbClient) {
+    public DbCompanyDao(DbClient dbClient) {
         this.dbClient = dbClient;
     }
 
