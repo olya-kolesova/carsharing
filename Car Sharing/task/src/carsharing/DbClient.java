@@ -6,9 +6,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 
-public class DbClient {
+public class DbClient<Entity> {
     static final String JDBC_DRIVER = "org.h2.Driver";
     private static final String CONNECTION_URL = "jdbc:h2:./src/carsharing/db/carsharing";
 
@@ -31,19 +33,16 @@ public class DbClient {
     }
 
 
-
-    public Optional<Company> select(String query, int id) {
+    public Optional<Entity> select(String query, int id, Function<ResultSet, Entity> setResult) {
         try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            Company company = null;
+            Entity entity = null;
             while (resultSet.next()) {
-                int index = resultSet.getInt("ID");
-                String name = resultSet.getString("NAME");
-                company = new Company(index, name);
+                entity = setResult.apply(resultSet);
             }
-            return Optional.of(company);
+            return Optional.of(entity);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -52,23 +51,21 @@ public class DbClient {
     }
 
 
-    public List<Company> selectForList(String query) {
-        List<Company> companies = new ArrayList<>();
+    public List<Entity> selectForList(String query, BiConsumer<ResultSet, List<Entity>> setResultList) {
+        List<Entity> entities = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
             Statement statement = connection.createStatement();
 
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
-                int id = resultSet.getInt("ID");
-                String name = resultSet.getString("NAME");
-                companies.add(new Company(id, name));
+                setResultList.accept(resultSet, entities);
             }
-
+            return entities;
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return companies;
+        return entities;
     }
 
 
@@ -114,6 +111,7 @@ public class DbClient {
             e.printStackTrace();
         }
     }
+
 
 
 

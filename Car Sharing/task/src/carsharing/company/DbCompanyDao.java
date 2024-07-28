@@ -2,11 +2,17 @@ package carsharing.company;
 
 import carsharing.DbClient;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class DbCompanyDao implements CompanyDao {
-    private final DbClient dbClient;
+    private final DbClient<Company> dbClient;
 
     private static final String CREATE_DB = """
             CREATE TABLE IF NOT EXISTS COMPANY(
@@ -66,19 +72,23 @@ public class DbCompanyDao implements CompanyDao {
             WHERE ID = ?
             """;
 
-    public DbCompanyDao(DbClient dbClient) {
+    public DbCompanyDao(DbClient<Company> dbClient) {
         this.dbClient = dbClient;
     }
 
     @Override
     public List<Company> findAll() {
-        List<Company> companies = dbClient.selectForList(SELECT_ALL);
-        return companies;
+        return dbClient.selectForList(SELECT_ALL, setResultList);
     }
 
     @Override
     public Optional<Company> findById(int id) {
-        return dbClient.select(SELECT_BY_ID, id);
+        if (dbClient.select(SELECT_BY_ID, id, setResult).isPresent()) {
+            return Optional.of(dbClient.select(SELECT_BY_ID, id, setResult).get());
+        } else {
+            return Optional.empty();
+        }
+
     }
 
     @Override
@@ -110,6 +120,33 @@ public class DbCompanyDao implements CompanyDao {
 
     public void createDb() {
         dbClient.run(CREATE_DB);
+    }
+
+
+    public Function<ResultSet, Company> setResult = x -> {
+        try {
+            int index = x.getInt("ID");
+            String name = x.getString("NAME");
+            return new Company(index, name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    };
+
+    public BiConsumer<ResultSet, List<Company>> setResultList = (x, y) -> {
+        try {
+            int index = x.getInt("ID");
+            String name = x.getString("NAME");
+            y.add(new Company(index, name));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
+
+
+    public Consumer<PreparedStatement> setValue = x -> {
+        x.setString(1, company)
     }
 
 }

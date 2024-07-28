@@ -1,6 +1,8 @@
 package carsharing.company;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface CompanyDao {
     Optional<Company> findById(int id);

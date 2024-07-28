@@ -20,7 +20,7 @@ public class DbCustomerDao {
             """;
 
     private final static String SELECT_ALL = """
-            SELECT * 
+            SELECT *
             FROM CUSTOMER
             """;
 
