@@ -4,8 +4,10 @@ import carsharing.car.Car;
 import carsharing.car.DbCarDao;
 import carsharing.company.Company;
 import carsharing.company.DbCompanyDao;
+import carsharing.customer.Customer;
 import carsharing.customer.DbCustomerDao;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -20,12 +22,15 @@ public class Main {
         DbCustomerDao dbCustomerDao = new DbCustomerDao(dbClient);
         dbCustomerDao.createTable();
 
+
         Scanner scanner = new Scanner(System.in);
         int commandStart = 100;
 
         while (commandStart != 0) {
             System.out.println("""
                     1. Log in as a manager
+                    2. Log in as a customer
+                    3. Create a customer
                     0. Exit""");
 
             try {
@@ -134,6 +139,27 @@ public class Main {
                             }
 
                         }
+                        break;
+
+                    case 2:
+                        System.out.println("Customer list:");
+                        List<Company> companies = dbCompanyDao.findAll();
+                        List<Car> allCars = dbCarDao.findAll(companies);
+                        for (Customer customer : dbCustomerDao.findAll(allCars)) {
+                            System.out.printf("%d.%s%n", customer.getId(), customer.getName());
+                        }
+
+                        System.out.println("Choose a customer:");
+                        Scanner scannerCust = new Scanner(System.in);
+                        int id = scannerCust.nextInt();
+                        dbCustomerDao.findById(id);
+                        break;
+                    case 3:
+                        Scanner scannerCustomer = new Scanner(System.in);
+                        System.out.println("Enter the customer name:");
+                        String nameCustomer = scannerCustomer.nextLine();
+                        dbCustomerDao.save(new Customer(nameCustomer));
+                        System.out.println("The customer was added!");
                         break;
                     case 0:
                         break;

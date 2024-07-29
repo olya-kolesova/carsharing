@@ -69,12 +69,10 @@ public class DbClient<Entity> {
     }
 
 
-
-
-    public void insertValue(String query, String name) {
+    public void insertValue(String query, Entity entity, BiConsumer<PreparedStatement, Entity> setValue) {
         try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, name);
+            setValue.accept(preparedStatement, entity);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -100,20 +98,5 @@ public class DbClient<Entity> {
         }
         return cars;
     }
-
-    public void insertCar(String query, Car car) {
-        try (Connection connection = DriverManager.getConnection(CONNECTION_URL)) {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, car.getName());
-            preparedStatement.setInt(2, car.getCompany().getId());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-
 
 }

@@ -93,18 +93,9 @@ public class DbCompanyDao implements CompanyDao {
 
     @Override
     public void save(Company company) {
-        dbClient.insertValue(INSERT, company.getName());
+        dbClient.insertValue(INSERT, company, setValue);
     }
 
-    public void updateColumnId() {
-        dbClient.run(SET_ID_NOT_NULL);
-        dbClient.run(UPDATE_ID_COLUMN);
-    }
-
-    public void updateColumnName() {
-        dbClient.run(ADD_NOT_NULL_NAME);
-        dbClient.run(ADD_UNIQUE_NAME);
-    }
 
     public void deleteAll() {
         dbClient.run(DELETE_ALL);
@@ -145,8 +136,12 @@ public class DbCompanyDao implements CompanyDao {
     };
 
 
-    public Consumer<PreparedStatement> setValue = x -> {
-        x.setString(1, company)
-    }
+    public BiConsumer<PreparedStatement, Company> setValue = (x, y) -> {
+        try {
+            x.setString(1, y.getName());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
 
 }

@@ -1,11 +1,23 @@
 package carsharing.customer;
 
 import carsharing.DbClient;
+import carsharing.car.Car;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class DbCustomerDao {
-    private final DbClient dbClient;
+    private final DbClient<Customer> dbClient;
+    private List<Car> cars;
 
-    public DbCustomerDao(DbClient dbClient) {
+
+    public DbCustomerDao(DbClient<Customer> dbClient) {
         this.dbClient = dbClient;
     }
 
@@ -24,9 +36,92 @@ public class DbCustomerDao {
             FROM CUSTOMER
             """;
 
+    private final static String SELECT_CUSTOMER = """
+            SELECT *
+            FROM CUSTOMER
+            WHERE ID = ?
+            """;
+
+
+    private final static String INSERT_CUSTOMER = """
+            INSERT INTO CUSTOMER (NAME)
+            VALUES (?);
+            """;
+
+
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
+    }
 
     public void createTable() {
         dbClient.run(CREATE_TABLE);
     }
+
+    public void save(Customer customer) {
+        dbClient.insertValue(INSERT_CUSTOMER, customer, setValue);
+    }
+
+    public List<Customer>findAll(List<Car> cars) {
+        setCars(cars);
+        return dbClient.selectForList(SELECT_ALL, setResultList);
+    }
+    @Override
+    public Customer findById(int id) {
+        dbClient.select()
+    }
+
+    public BiConsumer<PreparedStatement, Customer> setValue = (x, y) -> {
+        try {
+            x.setString(1, y.getName());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
+
+    public Function<ResultSet, Customer> setResult = x -> {
+        try {
+            int index = x.getInt("ID");
+            String name = x.getString("NAME");
+            int carId = x.getInt("RENTED_CAR_ID");
+            Customer customer = new Customer(index, name, null);
+
+            if (carId != 0) {
+                Optional<Car> carOpt = cars.stream().filter(y -> y.getId() == carId).findFirst();
+                carOpt.ifPresentOrElse(
+                    z -> customer.setCar(z),
+                    () -> System.out.println("There is no car with this id!")
+                );
+            }
+            return customer;
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    };
+
+    public BiConsumer<ResultSet, List<Customer>> setResultList = (x, y) -> {
+        try {
+            int index = x.getInt("ID");
+            String name = x.getString("NAME");
+            int indexCar = x.getInt("RENTED_CAR_ID");
+
+            if (indexCar != 0) {
+                Optional<Car> carOpt = cars.stream().filter(z -> z.getId() == indexCar).findFirst();
+                carOpt.ifPresentOrElse(
+                    t -> y.add(new Customer(index, name, t)),
+                    () ->  System.out.println("There is no car with such index!")
+                );
+            } else {
+                y.add(new Customer(index, name, null));
+            }
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
 
 }
