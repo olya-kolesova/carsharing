@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class DbCustomerDao {
+public class DbCustomerDao implements CustomerDAO{
     private final DbClient<Customer> dbClient;
     private List<Car> cars;
 
@@ -57,17 +57,19 @@ public class DbCustomerDao {
         dbClient.run(CREATE_TABLE);
     }
 
+    @Override
     public void save(Customer customer) {
         dbClient.insertValue(INSERT_CUSTOMER, customer, setValue);
     }
 
+    @Override
     public List<Customer>findAll(List<Car> cars) {
         setCars(cars);
         return dbClient.selectForList(SELECT_ALL, setResultList);
     }
     @Override
-    public Customer findById(int id) {
-        dbClient.select()
+    public Optional<Customer> findById(int id) {
+        return dbClient.select(SELECT_CUSTOMER, id, setResult);
     }
 
     public BiConsumer<PreparedStatement, Customer> setValue = (x, y) -> {

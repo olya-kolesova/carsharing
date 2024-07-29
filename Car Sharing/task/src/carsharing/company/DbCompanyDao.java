@@ -83,11 +83,7 @@ public class DbCompanyDao implements CompanyDao {
 
     @Override
     public Optional<Company> findById(int id) {
-        if (dbClient.select(SELECT_BY_ID, id, setResult).isPresent()) {
-            return Optional.of(dbClient.select(SELECT_BY_ID, id, setResult).get());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.of(dbClient.select(SELECT_BY_ID, id, setResult);
 
     }
 

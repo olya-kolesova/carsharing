@@ -152,7 +152,46 @@ public class Main {
                         System.out.println("Choose a customer:");
                         Scanner scannerCust = new Scanner(System.in);
                         int id = scannerCust.nextInt();
-                        dbCustomerDao.findById(id);
+                        Customer customer = null;
+                        try {
+                            customer = dbCustomerDao.findById(id).orElseThrow();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        System.out.println("""
+                                1. Rent a car
+                                2. Return a rented car
+                                3. My rented car
+                                0. Back
+                                """);
+
+                        Scanner scannerRent = new Scanner(System.in);
+                        int commandRent = scannerRent.nextInt();
+                        switch(commandRent) {
+                            case 1:
+                                System.out.println("Choose a company:");
+                                for (Company company : companies) {
+                                    System.out.printf("%d. %s", company.getId(), company.getName());
+                                }
+                                Scanner scannerCompany = new Scanner(System.in);
+                                int index = scannerCompany.nextInt();
+                                Company company = null;
+                                company = dbCompanyDao.findById(index).orElseThrow();
+
+                                List<Car> cars = dbCarDao.findByCompany(company);
+                                int count = 1;
+                                System.out.println("Choose a car:");
+                                for (Car car : cars) {
+                                    System.out.printf("%d. %s", count, car.getName());
+                                    count += 1;
+                                }
+
+                                int indexCar = scannerCompany.nextInt();
+                                dbCarDao.findById(cars.get(indexCar).getId());
+                        }
+
+
                         break;
                     case 3:
                         Scanner scannerCustomer = new Scanner(System.in);
