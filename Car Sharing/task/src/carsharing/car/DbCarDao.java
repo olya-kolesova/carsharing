@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class DbCarDao implements CarDao {
@@ -47,6 +48,11 @@ public class DbCarDao implements CarDao {
             DELETE FROM CAR;
             """;
 
+    private static final String SELECT_CAR = """
+            SELECT *
+            FROM CAR
+            WHERE ID = ?;
+            """;
 
 
     public DbCarDao(DbClient<Car> dbClient) {
@@ -62,13 +68,18 @@ public class DbCarDao implements CarDao {
         System.out.println("Table car created!");
     }
     @Override
+    public Optional<Car> findById(int id) {
+        return dbClient.select(SELECT_CAR, id, setResult);
+    }
+
+    @Override
     public List<Car> findByCompany(Company company) {
         return dbClient.selectCarsByCompany(SELECT_WITH_COMPANY, company);
     }
     @Override
     public List<Car> findAll(List<Company> companies) {
         this.setCompanies(companies);
-        return dbClient.selectForList(SELECT_ALL, setResult);
+        return dbClient.selectForList(SELECT_ALL, setResultList);
     }
     @Override
     public void save(Car car) {
@@ -88,7 +99,7 @@ public class DbCarDao implements CarDao {
         }
     };
 
-    public BiConsumer<ResultSet, List<Car>> setResult = (x, y) -> {
+    public BiConsumer<ResultSet, List<Car>> setResultList = (x, y) -> {
         try {
             int index = x.getInt("ID");
             String name = x.getString("NAME");
@@ -96,8 +107,8 @@ public class DbCarDao implements CarDao {
             Stream<Company> stream = companies.stream();
             Optional<Company> companyOpt = stream.filter(z -> z.getId() == companyId).findFirst();
             companyOpt.ifPresentOrElse(
-                    z -> y.add(new Car(index, name, z)),
-                    () -> System.out.println("There is no company with this id!")
+                z -> y.add(new Car(index, name, z)),
+                () -> System.out.println("There is no company with this id!")
             );
 
 
@@ -108,6 +119,20 @@ public class DbCarDao implements CarDao {
     };
 
 
+    public Function<ResultSet, Car> setResult = x -> {
+        try {
+            int id = x.getInt("ID");
+            String name = x.getString("NAME");
+            int companyId = x.getInt("COMPANY_ID");
+
+            Company company = companies.stream().filter(y -> y.getId() == companyId).findFirst().orElseThrow();
+            return new Car(id, name, company);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    };
 
 
 }

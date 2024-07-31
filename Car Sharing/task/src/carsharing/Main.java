@@ -6,9 +6,11 @@ import carsharing.company.Company;
 import carsharing.company.DbCompanyDao;
 import carsharing.customer.Customer;
 import carsharing.customer.DbCustomerDao;
-
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Scanner;
+
 
 public class Main {
 
@@ -31,6 +33,7 @@ public class Main {
                     1. Log in as a manager
                     2. Log in as a customer
                     3. Create a customer
+                    4. Delete all customers
                     0. Exit""");
 
             try {
@@ -69,8 +72,9 @@ public class Main {
                                             Company company = null;
                                             try {
                                                company = dbCompanyDao.findById(index).orElseThrow();
+                                                System.out.println("We found company!");
                                             } catch (Exception e) {
-                                                break;
+                                                System.out.println("We can't find the company!");
                                             }
 
                                             int commandCars = 100;
@@ -104,6 +108,7 @@ public class Main {
                                                         Car car = new Car(carName, company);
                                                         dbCarDao.save(car);
                                                         System.out.println("The car was added!");
+                                                        System.out.println(car.getCompany().getId());
                                                         break;
                                                     case 3:
                                                         dbCarDao.deleteCars();
@@ -114,8 +119,6 @@ public class Main {
                                                 }
 
                                             }
-
-
 
                                         }
                                         break;
@@ -142,57 +145,103 @@ public class Main {
                         break;
 
                     case 2:
-                        System.out.println("Customer list:");
                         List<Company> companies = dbCompanyDao.findAll();
-                        List<Car> allCars = dbCarDao.findAll(companies);
-                        for (Customer customer : dbCustomerDao.findAll(allCars)) {
-                            System.out.printf("%d.%s%n", customer.getId(), customer.getName());
-                        }
+                        if (companies.size() == 0) {
+                            System.out.println("The customer list is empty!");
+                            break;
+                        } else {
+                            System.out.println(companies.size());
+                            System.out.println("Customer list:");
+                            List<Car> allCars = dbCarDao.findAll(companies);
+                            for (Customer customer : dbCustomerDao.findAll(allCars)) {
+                                System.out.printf("%d.%s%n", customer.getId(), customer.getName());
+                            }
 
-                        System.out.println("Choose a customer:");
-                        Scanner scannerCust = new Scanner(System.in);
-                        int id = scannerCust.nextInt();
-                        Customer customer = null;
-                        try {
+                            System.out.println("Choose a customer:");
+                            Scanner scannerCust = new Scanner(System.in);
+                            int id = scannerCust.nextInt();
+                            Customer customer = null;
                             customer = dbCustomerDao.findById(id).orElseThrow();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
 
-                        System.out.println("""
-                                1. Rent a car
-                                2. Return a rented car
-                                3. My rented car
-                                0. Back
-                                """);
+                            Scanner scannerRent = new Scanner(System.in);
+                            int commandRent = 100;
+                            while (commandRent != 0) {
 
-                        Scanner scannerRent = new Scanner(System.in);
-                        int commandRent = scannerRent.nextInt();
-                        switch(commandRent) {
-                            case 1:
-                                System.out.println("Choose a company:");
-                                for (Company company : companies) {
-                                    System.out.printf("%d. %s", company.getId(), company.getName());
+                                System.out.println("""
+                                    1. Rent a car
+                                    2. Return a rented car
+                                    3. My rented car
+                                    0. Back
+                                    """);
+
+                                commandRent = scannerRent.nextInt();
+
+                                switch(commandRent) {
+                                    case 1:
+                                        if (customer.getCar() != null) {
+                                            System.out.println("You've already rented a car!");
+                                        } else {
+                                            System.out.println("Choose a company:");
+                                            for (Company company : companies) {
+                                                System.out.printf("%d. %s%n", company.getId(), company.getName());
+                                            }
+                                            Scanner scannerCompany = new Scanner(System.in);
+                                            int index = scannerCompany.nextInt();
+                                            Company company = null;
+                                            company = dbCompanyDao.findById(index).orElseThrow();
+
+                                            List<Car> cars = dbCarDao.findByCompany(company);
+                                            List<Customer> customers = dbCustomerDao.findAll(allCars);
+                                            List<Car> customersCars = customers.stream().map(Customer::getCar).
+                                                    filter(Objects::nonNull).toList();
+
+                                            List<Car> carsToChoose = cars.stream().filter(x -> !(customersCars.contains(x))).toList();
+                                            int count = 1;
+                                            System.out.println("Choose a car:");
+                                            for (Car car : carsToChoose) {
+                                                System.out.printf("%d. %s%n", count, car.getName());
+                                                count += 1;
+                                            }
+
+                                            int indexCar = scannerCompany.nextInt();
+    //                                        System.out.println(carsToChoose.get(indexCar - 1).getId());
+                                            Car car = dbCarDao.findById(carsToChoose.get(indexCar - 1).getId()).orElseThrow();
+                                            customer.setCar(car);
+
+                                            dbCustomerDao.update(customer);
+
+                                            System.out.printf("You rented '%s'%n", car.getName());
+
+                                        }
+                                        break;
+
+
+                                    case 2:
+                                        customer.setCar(null);
+                                        dbCustomerDao.updateNull(customer);
+                                        System.out.println("You've returned a rented car!");
+                                        break;
+
+                                    case 3:
+                                        Optional.of(customer.getCar()).ifPresentOrElse(
+                                            x -> System.out.printf("""
+                                                Your rented car:
+                                                %s
+                                                Company:
+                                                %s%n
+                                                """, x.getName(), x.getCompany().getName()),
+                                            () -> System.out.println("You don't have rented car yet!")
+                                        );
+
+                                        break;
+
                                 }
-                                Scanner scannerCompany = new Scanner(System.in);
-                                int index = scannerCompany.nextInt();
-                                Company company = null;
-                                company = dbCompanyDao.findById(index).orElseThrow();
 
-                                List<Car> cars = dbCarDao.findByCompany(company);
-                                int count = 1;
-                                System.out.println("Choose a car:");
-                                for (Car car : cars) {
-                                    System.out.printf("%d. %s", count, car.getName());
-                                    count += 1;
-                                }
+                            }
 
-                                int indexCar = scannerCompany.nextInt();
-                                dbCarDao.findById(cars.get(indexCar).getId());
+                            break;
+
                         }
-
-
-                        break;
                     case 3:
                         Scanner scannerCustomer = new Scanner(System.in);
                         System.out.println("Enter the customer name:");
@@ -200,6 +249,9 @@ public class Main {
                         dbCustomerDao.save(new Customer(nameCustomer));
                         System.out.println("The customer was added!");
                         break;
+
+                    case 4:
+                        dbCustomerDao.deleteAll();
                     case 0:
                         break;
                     default:
@@ -211,11 +263,6 @@ public class Main {
             }
         }
 
-
-
-
-//        dbCompanyDao.updateColumnId();
-//        dbCompanyDao.updateColumnName();
     }
 
 

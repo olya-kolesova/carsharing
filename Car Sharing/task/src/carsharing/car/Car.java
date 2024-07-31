@@ -2,6 +2,8 @@ package carsharing.car;
 import carsharing.company.Company;
 import carsharing.customer.Customer;
 
+import java.util.Objects;
+
 public class Car {
     private int id;
     private String name;
@@ -43,6 +45,15 @@ public class Car {
         this.company = companyNew;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Car car)) return false;
+        return id == car.id && Objects.equals(name, car.name) && Objects.equals(company, car.company);
+    }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, company);
+    }
 }

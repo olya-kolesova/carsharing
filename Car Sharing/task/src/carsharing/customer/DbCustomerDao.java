@@ -44,9 +44,19 @@ public class DbCustomerDao implements CustomerDAO{
 
 
     private final static String INSERT_CUSTOMER = """
-            INSERT INTO CUSTOMER (NAME)
-            VALUES (?);
-            """;
+        INSERT INTO CUSTOMER (NAME)
+        VALUES (?);
+        """;
+
+    private final static String UPDATE_CAR = """
+        UPDATE CUSTOMER
+        SET RENTED_CAR_ID = ?
+        WHERE ID = ?
+    """;
+
+    private static final String DELETE_ALL = """
+        DELETE FROM CUSTOMER;
+        """;
 
 
     public void setCars(List<Car> cars) {
@@ -72,6 +82,19 @@ public class DbCustomerDao implements CustomerDAO{
         return dbClient.select(SELECT_CUSTOMER, id, setResult);
     }
 
+    @Override
+    public void update(Customer customer) {
+        dbClient.insertValue(UPDATE_CAR, customer, setCar);
+    }
+
+    public void updateNull(Customer customer) {
+        dbClient.insertValue(UPDATE_CAR, customer, setNull);
+    }
+
+    public void deleteAll() {
+        dbClient.run(DELETE_ALL);
+    }
+
     public BiConsumer<PreparedStatement, Customer> setValue = (x, y) -> {
         try {
             x.setString(1, y.getName());
@@ -79,6 +102,27 @@ public class DbCustomerDao implements CustomerDAO{
             e.printStackTrace();
         }
     };
+
+    public BiConsumer<PreparedStatement, Customer> setCar = (x, y) -> {
+        try {
+            x.setInt(1, y.getCar().getId());
+            x.setInt(2, y.getId());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
+
+    public BiConsumer<PreparedStatement, Customer> setNull = (x, y) -> {
+        try {
+            x.setObject(1, null);
+            x.setInt(2, y.getId());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
+
 
     public Function<ResultSet, Customer> setResult = x -> {
         try {
