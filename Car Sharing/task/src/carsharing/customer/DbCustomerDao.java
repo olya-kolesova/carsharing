@@ -28,6 +28,8 @@ public class DbCustomerDao implements CustomerDAO{
                 RENTED_CAR_ID INT NULL,
                 CONSTRAINT fk_car FOREIGN KEY(RENTED_CAR_ID)
                 REFERENCES CAR(ID)
+                ON DELETE SET NULL
+                ON UPDATE CASCADE
             );
             """;
 
@@ -56,6 +58,10 @@ public class DbCustomerDao implements CustomerDAO{
 
     private static final String DELETE_ALL = """
         DELETE FROM CUSTOMER;
+        """;
+
+    private static final String DROP_CUSTOMER = """
+        DROP TABLE CUSTOMER;
         """;
 
 
@@ -93,6 +99,10 @@ public class DbCustomerDao implements CustomerDAO{
 
     public void deleteAll() {
         dbClient.run(DELETE_ALL);
+    }
+
+    public void dropCustomer() {
+        dbClient.run(DROP_CUSTOMER);
     }
 
     public BiConsumer<PreparedStatement, Customer> setValue = (x, y) -> {
